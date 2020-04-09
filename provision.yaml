@@ -1,0 +1,13 @@
+---
+- name: "A basic Play to provision Argo into a single namespace."
+
+  hosts: localhost
+  connection: local
+
+  roles:
+  - role: thoth-station.argo_workflows
+    tags:
+      - argo
+      - argo-workflows
+    namespace: default
+    ref: v2.4.0
