@@ -1,0 +1,58 @@
+
+# coinflip-recursive is a variation of the coinflip example.
+# This is an example of a dynamic workflow which extends
+# indefinitely until it acheives a desired result. In this
+# example, the 'flip-coin' step is recursively repeated until
+# the result of the step is "heads".
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: coinflip-
+spec:
+  serviceAccountName: argo
+  entrypoint: coinflip
+  
+  volumes:
+  - name: outputdir
+    emptyDir: {}
+
+
+  templates:
+  - name: coinflip
+    steps:
+    # flip a coin
+    - - name: flip-coin
+        template: flip-coin
+    # evaluate the result in parallel
+    - - name: heads
+        template: heads                 # call heads template if "heads"
+        when: "{{steps.flip-coin.outputs.parameters.answer}} == heads"
+      - name: tails
+        template: coinflip                 # call tails template if "tails"
+        when: "{{steps.flip-coin.outputs.parameters.answer}} == tails"
+
+  # Return heads or tails based on a random number
+  - name: flip-coin
+    script:
+      image: python:alpine3.6
+      volumeMounts:
+      - mountPath: /mnt/output
+        name: outputdir
+      command: [python]
+      source: |
+        import random
+        result = "heads" if random.randint(0,1) == 0 else "tails"
+        print(result)
+        with open("/mnt/output/output.txt", "w") as text_file:
+            print(result, file=text_file)
+    outputs:
+      parameters:
+      - name: answer	# name of output parameter
+        valueFrom:
+          path: /mnt/output/output.txt	# set the value of hello-param to the contents of this hello-world.txt
+
+  - name: heads
+    container:
+      image: alpine:3.6
+      command: [sh, -c]
+      args: ["echo \"it was heads\""]
