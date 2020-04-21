@@ -1,33 +1,17 @@
+---
 apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+kind: WorkflowTemplate
 metadata:
-  generateName: kebechet-argo-job-
+  name: kebechet-job
+  annotations:
+    thoth-station.ninja/template-version: 0.1.1
+  labels:
+    app: thoth
+    component: kebechet-job
+
 spec:
-  serviceAccountName: argo
-
-  entrypoint: Kebechet-Job
-
-  arguments:
-    parameters:
-      - name: payload
-        value: webhook-payload
-
-  volumes:
-    - name: kebechet-secrets
-      secret:
-        secretName: kebechet-secret
-    - name: thoth-secrets
-      secret:
-        secretName: thoth
-    - name: ssh-config
-      secret:
-        secretName: kebechet-secret     
-        items:
-        - key: ssh-privatekey
-          path: id_rsa
-
   templates:
-    - name: Kebechet-Job
+    - name: kebechet-job
       inputs:
         parameters:
         - name: payload 
@@ -73,10 +57,6 @@ spec:
                 key: sentry-dsn
                 name: thoth
         volumeMounts:
-          - name: kebechet-secrets
-            mountPath: "/secret"
-          - name: thoth-secrets
-            mountPath: "/secret/thoth"
           - name: ssh-config
             mountPath: /home/user/.ssh
             readOnly: true

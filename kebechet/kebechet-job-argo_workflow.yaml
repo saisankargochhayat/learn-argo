@@ -13,12 +13,6 @@ spec:
         value: webhook-payload
 
   volumes:
-    - name: kebechet-secrets
-      secret:
-        secretName: kebechet-secret
-    - name: thoth-secrets
-      secret:
-        secretName: thoth
     - name: ssh-config
       secret:
         secretName: kebechet-secret     
@@ -73,10 +67,6 @@ spec:
                 key: sentry-dsn
                 name: thoth
         volumeMounts:
-          - name: kebechet-secrets
-            mountPath: "/secret"
-          - name: thoth-secrets
-            mountPath: "/secret/thoth"
           - name: ssh-config
             mountPath: /home/user/.ssh
             readOnly: true
