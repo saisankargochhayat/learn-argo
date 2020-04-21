@@ -1,0 +1,18 @@
+
+apiVersion: v1
+kind: Template
+metadata:
+  name: kebechet
+  annotations:
+    description: This is Kebechet Job Config, this template is meant to be used by Bots, but could also be used by humans...
+    openshift.io/display-name: Kebechet Job
+    version: 1.0.1
+    tags: thoth,ai-stacks,kebechet,cyborg,srcops
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
+    template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    thoth-station.ninja/template-version: 1.0.1
+  labels:
+    app: thoth
+    template: kebechet
+    component: kebechet

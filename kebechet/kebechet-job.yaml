@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: kebechet-argo-job-
+spec:
+  serviceAccountName: argo
+
+  entrypoint: Kebechet-Job
+
+  arguments:
+    parameters:
+      - name: payload
+        value: webhook-payload
+
+  volumes:
+    - name: kebechet-secrets
+      secret:
+        secretName: kebechet-secret
+    - name: thoth-secrets
+      secret:
+        secretName: thoth
+    - name: ssh-config
+      secret:
+        secretName: kebechet-secret     
+        items:
+        - key: ssh-privatekey
+          path: id_rsa
+
+  templates:
+    - name: Kebechet-Job
+      inputs:
+        parameters:
+        - name: payload 
+      container:
+        image: "quay.io/saisankargochhayat/kebechet:master"
+        command: [sh, -c]
+        args: [
+            '
+            ./app.sh
+            ',
+          ]
+        env:
+          - name: PIPENV_NOSPIN
+            value: "1"
+          - name: PIPENV_COLORBLIND
+            value: "1"
+          - name: PIPENV_HIDE_EMOJIS
+            value: "1"
+          - name: KEBECHET_VERBOSE
+            value: "1"
+          - name: KEBECHET_SUBCOMMAND
+            value: "run-webhook"
+          - name: KEBECHET_PAYLOAD
+            value: "{{inputs.parameters.payload}}"
+          - name: GITHUB_KEBECHET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: github-oauth-token
+                name: kebechet-secret
+          - name: GITLAB_KEBECHET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: gitlab-oauth-token
+                name: kebechet-secret
+          - name: PAGURE_KEBECHET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: pagure-oauth-token
+                name: kebechet-secret
+          - name: SENTRY_DSN
+            valueFrom:
+              secretKeyRef:
+                key: sentry-dsn
+                name: thoth
+        volumeMounts:
+          - name: kebechet-secrets
+            mountPath: "/secret"
+          - name: thoth-secrets
+            mountPath: "/secret/thoth"
+          - name: ssh-config
+            mountPath: /home/user/.ssh
+            readOnly: true
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 1
+            memory: 2Gi
