@@ -14,7 +14,7 @@ spec:
     - name: kebechet-job
       inputs:
         parameters:
-        - name: payload 
+        - name: WEBHOOK_PAYLOAD 
       container:
         image: "quay.io/saisankargochhayat/kebechet:master"
         command: [sh, -c]
@@ -35,7 +35,7 @@ spec:
           - name: KEBECHET_SUBCOMMAND
             value: "run-webhook"
           - name: KEBECHET_PAYLOAD
-            value: "{{inputs.parameters.payload}}"
+            value: "{{inputs.parameters.WEBHOOK_PAYLOAD}}"
           - name: GITHUB_KEBECHET_TOKEN
             valueFrom:
               secretKeyRef:

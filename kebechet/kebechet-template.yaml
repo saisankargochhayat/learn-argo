@@ -1,3 +1,4 @@
+# This template uses the kebechet-job argo workflow to run kebechet on a particular webhook. 
 apiVersion: v1
 kind: Template
 metadata:
@@ -17,6 +18,10 @@ metadata:
     component: kebechet
 
 parameters:
+  - name: WORKFLOW_ID
+    description: "a UUID for the workflow instance"
+    displayName: "Workflow UUID"
+    required: true
   - name: WEBHOOK_PAYLOAD
     description: "The webhook payload for kebecher run."
     displayName: "Webhook Payload"
@@ -26,8 +31,7 @@ objects:
   - apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      # Change to workflow id
-      name: "kebechet-job"
+      name: "${WORKFLOW_ID}"
       annotations:
         thoth-station.ninja/template-version: 0.1.1
       labels:
@@ -43,7 +47,7 @@ objects:
       entrypoint: kebechet-job
       arguments:
         parameters:
-          - name: "payload"
+          - name: "WEBHOOK_PAYLOAD"
             value: "${WEBHOOK_PAYLOAD}"
 
       volumes:
@@ -60,11 +64,11 @@ objects:
             archiveLogs: true
           dag:
             tasks:
-              - name: "kebechet-job"
+              - name: "kebechet-webhook-run"
                 templateRef:
                   name: "kebechet-job"
                   template: "kebechet-job"
                 arguments:
                   parameters:
-                    - name: "payload"
-                      value: "{{workflow.parameters.payload}}"
+                    - name: "WEBHOOK_PAYLOAD"
+                      value: "{{workflow.parameters.WEBHOOK_PAYLOAD}}"
