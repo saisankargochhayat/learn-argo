@@ -31,7 +31,9 @@ spec:
         arguments:
           parameters: [{name: message, value: C}]
       - name: D
-        dependencies: [B, C]
+        dependencies:
+          - "B"
+          - "C"
         template: echo
         arguments:
           parameters: [{name: message, value: D}]
